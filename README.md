@@ -1,6 +1,6 @@
 # Statistical Model Checking for rule-based models in the Kappa language
 
-This repository contains a research prototype for statistical model checking of stochastic models written in the [Kappa](https://kappalanguage.org/) language.
+This repository contains a research prototype for statistical model checking of stochastic models written in the [Kappa](https://kappalanguage.org/) language. The method is described in details here: https://doi.org/10.1007/978-3-032-30870-2_5
 
 Given a Kappa model and a bounded linear temporal logic (BLTL) property, the framework:
 
@@ -128,6 +128,27 @@ Atomic propositions currently consist of:
 - the name of a Kappa algebraic variable;
 - a strict comparison operator, `<` or `>`;
 - an integer threshold.
+
+## Cite us
+
+> Salazar, A., Feret, J., & Petrov, T. (2027). Statistical Model Checking for Rule-Based Models in the Kappa Language. In P. T. Monteiro (Ed.), Computational Methods in Systems Biology: CMSB 2026 (Lecture Notes in Computer Science, Vol. 16678, pp. 73–103). Springer, Cham. https://doi.org/10.1007/978-3-032-30870-2_5
+
+```bibtex
+@inproceedings{SalazarFeretPetrov2027,
+  author    = {Salazar, Albin and Feret, J{\'e}r{\^o}me and Petrov, Tatjana},
+  editor    = {Monteiro, Pedro T.},
+  title     = {Statistical Model Checking for Rule-Based Models in the Kappa Language},
+  booktitle = {Computational Methods in Systems Biology},
+  series    = {Lecture Notes in Computer Science},
+  volume    = {16678},
+  pages     = {73--103},
+  year      = {2027},
+  publisher = {Springer Nature Switzerland},
+  address   = {Cham},
+  doi       = {10.1007/978-3-032-30870-2_5},
+  isbn      = {978-3-032-30870-2}
+}
+```
 
 ## Licence
 

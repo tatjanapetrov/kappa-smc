@@ -1,0 +1,8 @@
+%var: k_1 0.01
+%agent: A(x, y) // Declaration of species A
+'bind_A' A(x[.]), A(y[.])-> A(x[1]), A(y[1]) @ k_1 // rule for binding event
+%init: 50 A() // Initial quantity of species 'A'
+%obs: 'polymer_A_1' |A(y[_], x[.])| // Trackthe number of chains with at least 2 agents
+
+%var: 'chain_satisfaction' 0 // Boolean variable to track pattern satisfaction
+%obs: 'len_poly' 'chain_satisfaction' // Track the quantity of the Boolean variable

@@ -1,0 +1,47 @@
+%var: dec_y 0.01
+%var: dec_x 0.01
+%var: 'decision_distance' 9
+%var: 'minimal_consensus' .50
+%var: ZX 24
+%var: ZY 24
+
+%agent: A(a{u, y, x})
+%agent: Z(z{y, x})
+
+'y_undecided' A(a{x}), A(a{y})-> A(a{x}), A(a{u}) @ dec_x
+'x_undecided' A(a{x}), A(a{y})-> A(a{u}), A(a{y}) @ dec_y
+'decide_x' A(a{x}), A(a{u})-> A(a{x}), A(a{x}) @ dec_x
+'decide_y' A(a{y}), A(a{u})-> A(a{y}), A(a{y}) @ dec_y
+'stubborn_x_1' A(a{y}), Z(z{x})-> A(a{u}), Z(z{x}) @ dec_x
+'stubborn_x_2' A(a{u}), Z(z{x})-> A(a{x}), Z(z{x}) @ dec_x
+'stubborn_y_1' A(a{x}), Z(z{y})-> A(a{u}), Z(z{y}) @ dec_y
+'stubborn_y_2' A(a{u}), Z(z{y})-> A(a{y}), Z(z{y}) @ dec_y
+
+%obs: X |A(a{x})| + |Z(z{x})|
+%obs: Zx |Z(z{x})|
+%obs: Zy |Z(z{y})|
+%obs: Y |A(a{y})| + |Z(z{y})|
+%obs: U |A(a{u})|
+
+%init: 0 A(a{u})
+%init: 50-ZX A(a{x})
+%init: 50-ZY A(a{y})
+%init: ZX Z(z{x})
+%init: ZY Z(z{y})
+
+%var: 'size_dec_x' |A(a{x})| + |Z(z{x})|
+%var: 'size_dec_y' |A(a{y})| + |Z(z{y})|
+%var: 'robot_population' |A()| + |Z()|
+%var: 'fraction_x' 'size_dec_x'/'robot_population'
+%var: 'fraction_y' 'size_dec_y'/'robot_population'
+%var: 'consensus_x' 0
+%var: 'consensus_y' 0
+%obs: 'con_x' 'consensus_x'
+%obs: 'con_y' 'consensus_y'
+
+%mod: 'fraction_x' > 'minimal_consensus' && 'size_dec_x' > 'decision_distance' + 'size_dec_y' do $UPDATE 'consensus_x' 1; $UPDATE 'consensus_y' 0; repeat 'fraction_x' > 'minimal_consensus'
+%mod: 'fraction_y' > 'minimal_consensus' && 'size_dec_y' > 'decision_distance' + 'size_dec_x' do $UPDATE 'consensus_y' 1; $UPDATE 'consensus_x' 0; repeat 'fraction_y' > 'minimal_consensus'
+%mod: 'consensus_x' = 1 && 'fraction_x' < 'minimal_consensus' do $UPDATE 'consensus_x' 0; repeat 'fraction_x' < 'minimal_consensus'
+%mod: 'consensus_y' = 1 && 'fraction_y' < 'minimal_consensus' do $UPDATE 'consensus_y' 0; repeat 'fraction_y' < 'minimal_consensus'
+%mod: 'consensus_x' = 1 && 'size_dec_x' < 'decision_distance' + 'size_dec_y' + 1 do $UPDATE 'consensus_x' 0; repeat 'decision_distance' + 'size_dec_y' + 1 > 'size_dec_x'
+%mod: 'consensus_y' = 1 && 'size_dec_y' < 'decision_distance' + 'size_dec_x' + 1 do $UPDATE 'consensus_y' 0; repeat 'decision_distance' + 'size_dec_x' + 1 > 'size_dec_y'

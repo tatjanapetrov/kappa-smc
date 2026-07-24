@@ -1,0 +1,85 @@
+//////// Signatures
+%agent: D(a1,a2,d,b2,loop{b, ub}) // Declaration of agent representing DNA with four binding sites: 
+//'a1' and 'a2' for binding the activators, 
+// 'd' and 'b2' for binding the repressor
+//(both) or Polymerase (site 'd'), and site 'loop' 
+//which indicates whether the DNA is looped or not.
+%agent: RNAP(d) // Declaration of Polymerase with binding site named 'd'
+%agent: A(a) // Declaration of activator A with binding site named 'a'
+%agent: R(d) // Declaration of repressor B with binding site named 'd'
+%agent: P() // Declaration of protein P
+
+//////// Rules
+// numbers (labels) inside '[]' sign denote bond identifiers
+// for bimolecular reactions, the rate is scaled with the average number of molecules in
+// the cell 'N' in order to convert from units 'per Mol per sec' to 'per molecule per sec'
+
+// POLYMERASE
+'rule_1' RNAP(d[.]), D(d[.])-> RNAP(d[1]), D(d[1]) @ on_rnap // RNAP binds, bimolecular reaction
+'rule_2' RNAP(d[1]), D(d[1])-> RNAP(d[.]), D(d[.]) @ off_rnap // RNAP unbinds PROTEIN
+'rule_3' RNAP(d[1]), D(d[1]), .-> RNAP(d[1]), D(d[1]), P() @ p_on // P is expressed when RNAP is bound
+'rule_4' P()-> . @ p_off
+
+// ACTIVATION
+//A binds to the site 'a1' or site 'a2' of DNA whenever it is not looped
+'rule_5' A(a[.]), D(a1[.], a2, loop{ub}) <-> A(a[1]), D(a1[1], a2, loop{ub}) @ on_a, off_a
+'rule_6' A(a[.]), D(a1, a2[.], loop{ub}) <-> A(a[1]), D(a1, a2[1], loop{ub}) @ on_a, off_a
+// lopping is immediate when the second activator binds
+'rule_7' A(a[1]), D(a1[1],a2[.],loop{ub}), A(a[.]) <-> A(a[1]), D(a1[1],a2[2],loop{b}), A(a[2]) @ loop_a, unloop_a
+'rule_8' A(a[1]), D(a1[.],a2[1],loop{ub}), A(a[.]) <-> A(a[1]), D(a1[2],a2[1],loop{b}), A(a[2]) @ loop_a, unloop_a
+// if A is bound to site 'a1', it recruits RNAP
+'rule_9' A(a[1]), D(a1[1],d[.]), RNAP(d[.])-> A(a[1]), D(a1[1],d[2]), RNAP(d[2]) @ on_rnap_if_a
+
+// INHIBITION
+// R binds to site 'd' or site 'b2' of DNA whenever it is not looped
+// By binding to site 'd', repressor inhibits the binding of RNAP to the same site, and
+//hence inhibits the expression of the protein indirectly
+'rule_10' R(d[.]), D(d[.],b2,loop{ub}) <-> R(d[1]), D(d[1],b2,loop{ub}) @ on_b, off_b
+'rule_11' R(d[.]), D(d,b2[.],loop{ub}) <-> R(d[1]), D(d,b2[1],loop{ub}) @ on_b, off_b
+// looping is immediate when the second repressor binds
+'rule_12' R(d[1]), D(d[1],b2[.],loop{ub}), R(d[.]) <-> R(d[1]), D(d[1],b2[2],loop{b}), R(d[2]) @ loop_b, unloop_b
+'rule_13' R(d[1]), D(d[.],b2[1],loop{ub}), R(d[.]) <-> R(d[1]), D(d[2],b2[1],loop{b}), R(d[2]) @ loop_b, unloop_b
+
+
+//////// Variables
+//// rates
+%var: N 10^9 // the average number of molecules in the cell
+%var: on_rnap 10^4/N
+%var: off_rnap 1.6*0.01
+%var: on_rnap_if_a 9*on_rnap
+%var: on_b 8.8*10^7/N
+%var: off_b 0.19
+%var: on_a 8.8*10^7/N
+%var: off_a 0.0264
+%var: p_on 0.5
+%var: p_off 0.001
+%var: rnap0 1500 // initial number of RNAP molecules
+%var: a_add 275
+%var: b_add 350
+%var: unloop_a off_a/1000
+%var: unloop_b off_b/10000
+%var: p0 240 // initial number of proteins
+%var: b0 0 // initial number of B molecules
+%var: a0 0
+%var: loop_a on_a
+%var: loop_b on_b
+
+//////// Observables
+%obs: protein |P()|
+%obs: d_active |D(d[1]),RNAP(d[1])|
+
+////////// Perturbation
+%mod: alarm 100 do $ADD a_add A(a); // 5400
+%mod: alarm 100 do $ADD b_add R(d); // 5460
+%var: p_AR 0 // Proposition for genes.
+%obs: 'p_ar' p_AR
+
+%mod: |P()| > 350 do $UPDATE p_AR 1; repeat |P()| > 350
+%mod: |P()| < 351 do $UPDATE p_AR 0; repeat |P()| < 351
+
+//////// Initial conditions
+%init: 1 D(d,a1,a2,b2,loop{ub})
+%init: rnap0 RNAP(d)
+%init: b0 R(d)
+%init: a0 A(a)
+%init: p0 P()

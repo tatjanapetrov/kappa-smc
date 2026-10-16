@@ -11,6 +11,23 @@ from .bltl import (BLTLMonitor, Formula, bind_ap_indices,
 from .instrumentation import instrument_kappa_model
 from .simulation import KappaSimulator, process_simulation_results
 
+import math
+
+def hoeffding_sample_size(
+    epsilon: float,
+    confidence_level: float,
+) -> int:
+    """Minimum sample size satisfying Hoeffding's two-sided bound."""
+    if not 0 < epsilon < 1:
+        raise ValueError("epsilon must be between 0 and 1.")
+    if not 0 < confidence_level < 1:
+        raise ValueError("confidence_level must be between 0 and 1.")
+
+    alpha = 1 - confidence_level
+
+    return math.ceil(
+        math.log(2 / alpha) / (2 * epsilon**2)
+    )
 
 @dataclass(frozen=True)
 class SMCConfig:
@@ -18,6 +35,19 @@ class SMCConfig:
     progress_every: int = 10
     confidence_level: float = 0.95
 
+    @classmethod
+    def from_hoeffding(
+        cls,
+        epsilon: float,
+        confidence_level: float = 0.95,
+        progress_every: int = 10,
+    ) -> "SMCConfig":
+        return cls(
+            runs=hoeffding_sample_size(epsilon, confidence_level),
+            progress_every=progress_every,
+            confidence_level=confidence_level,
+        )
+    
     def __post_init__(self) -> None:
         if self.runs <= 0:
             raise ValueError("runs must be positive.")

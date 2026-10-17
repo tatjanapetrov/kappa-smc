@@ -17,18 +17,8 @@ def instrument_kappa_model(file_name, AP_triples):
         else:
             model += l + "\n"
 
-    for i in range(len(AP_triples)):
-        p = AP_triples[i]
-
-        model += "%var: 'a_{}'".format(i) + " 1"
-        model += " %obs: 'p_{}'".format(i) + " 'a_{}'".format(i)
-        model += " %mod: " + p[0] + p[1] + str(p[2]) + " do $UPDATE " + "'a_{}'".format(i) + " 1; repeat " + p[0] + p[1] + str(p[2]) + "\n"
-
-        # NOTE: we make AP false by updating a_i=0 on the "opposite side"
-        # we assume integer thresholds
-        if p[1] == '>':
-            model += " %mod: " + p[0] + '<' + str(int(p[2]) + 1) + " do $UPDATE " + "'a_{}'".format(i) + " 0; repeat " + p[0] + '<' + str(int(p[2]) + 1) + "\n"
-        elif p[1] == '<':
-            model += " %mod: " + p[0] + '>' + str(int(p[2]) - 1) + " do $UPDATE " + "'a_{}'".format(i) + " 0; repeat " + p[0] + '>' + str(int(p[2]) - 1) + "\n"
+    for i, (var, op, threshold) in enumerate(AP_triples):
+        condition = f"{var} {op} {threshold}"
+        model += (f"%obs: 'p_{i}' ({condition}) [?] 1 [:] 0\n")
 
     return model

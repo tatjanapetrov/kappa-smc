@@ -57,11 +57,11 @@ def process_simulation_results(results: dict, ap_count: int, required_horizon: f
     state, extend the trajectory by repeating its final state at the required final time.
 
     Returns:
-        legend:names of all simulation columns;
+        legend: names of all simulation columns;
 
-        series:complete simulation table, ordered by time;
+        series: complete simulation table, ordered by time;
 
-        times:values of the [T] column;
+        times: values of the [T] column;
 
         ap_values: boolean matrix containing p_0, ..., p_n.
     """

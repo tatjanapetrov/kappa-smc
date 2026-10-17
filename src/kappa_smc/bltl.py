@@ -129,9 +129,7 @@ class BLTLMonitor:
             result = self._evaluate_until(formula)
 
         else:
-            raise TypeError(
-                f"Unsupported formula node: {type(formula).__name__}"
-            )
+            raise TypeError(f"Unsupported formula node: {type(formula).__name__}")
         
         self._cache[formula] = result
 
@@ -160,11 +158,7 @@ class BLTLMonitor:
 
         return self.ap_values[:, formula.idx].copy()
 
-    def _window_stop(
-        self,
-        start_index: int,
-        bound: float,
-    ) -> int | None:
+    def _window_stop(self, start_index: int, bound: float) -> int | None:
         """
         Return the exclusive index delimiting the interval
 
@@ -180,31 +174,20 @@ class BLTLMonitor:
         if (self.times[-1] + self.TIME_TOLERANCE < deadline):
             return None
 
-        return int(
-            np.searchsorted(
-                self.times,
-                deadline + self.TIME_TOLERANCE,
-                side="right",
-            )
-        )
+        return int(np.searchsorted(self.times, deadline + self.TIME_TOLERANCE, side="right"))
 
     def _evaluate_globally(self,formula: G_leq) -> np.ndarray:
         inner = self.evaluate(formula.phi)
         result = np.zeros(len(self.times), dtype=bool)
 
         for start_index in range(len(self.times)):
-            stop_index = self._window_stop(
-                start_index,
-                formula.bound,
-            )
+            stop_index = self._window_stop(start_index, formula.bound)
 
             if stop_index is None:
                 result[start_index] = False
                 continue
 
-            result[start_index] = bool(
-                np.all(inner[start_index:stop_index])
-            )
+            result[start_index] = bool(np.all(inner[start_index:stop_index]))
 
         return result
 
@@ -213,18 +196,13 @@ class BLTLMonitor:
         result = np.zeros(len(self.times), dtype=bool)
 
         for start_index in range(len(self.times)):
-            stop_index = self._window_stop(
-                start_index,
-                formula.bound,
-            )
+            stop_index = self._window_stop(start_index, formula.bound)
 
             if stop_index is None:
                 result[start_index] = False
                 continue
 
-            result[start_index] = bool(
-                np.any(inner[start_index:stop_index])
-            )
+            result[start_index] = bool(np.any(inner[start_index:stop_index]))
 
         return result
 
@@ -235,10 +213,7 @@ class BLTLMonitor:
         result = np.zeros(len(self.times), dtype=bool)
 
         for start_index in range(len(self.times)):
-            stop_index = self._window_stop(
-                start_index,
-                formula.bound,
-            )
+            stop_index = self._window_stop(start_index, formula.bound)
 
             if stop_index is None:
                 # A witness may still make the formula true before
@@ -250,9 +225,7 @@ class BLTLMonitor:
 
                 left_holds_before_witness = (
                     witness_index == start_index
-                    or np.all(
-                        left[start_index:witness_index]
-                    )
+                    or np.all(left[start_index:witness_index])
                 )
 
                 if (right_holds and left_holds_before_witness):
@@ -377,10 +350,7 @@ def extract_atomic_propositions(formula: Formula) -> list[str]:
     return unique
 
 
-def bind_ap_indices(
-    formula: Formula,
-    atomic_propositions: list[str],
-) -> Formula:
+def bind_ap_indices(formula: Formula, atomic_propositions: list[str]) -> Formula:
     """
     Return a copy of the formula where each AP is associated with
     the index of the corresponding column in the monitoring matrix.

@@ -1,0 +1,20 @@
+%var: k_1 0.01
+%agent: A(x, y) 
+'bind_A' A(x[.]), A(y[.])-> A(x[1]), A(y[1]) @ k_1 
+%init: 50 A() 
+%obs: 'polymer_A_1' |A(y[_], x[.])| 
+
+%var: 'chain_satisfaction' 0 
+%obs: 'len_poly' 'chain_satisfaction' 
+
+
+%obs: 'C_1' |A(y[_], x[.])|
+%obs: 'C_2' |A(y[_], x[1]), A(y[1], x[.])|
+%obs: 'C_3' |A(y[_], x[1]), A(y[1], x[2]), A(y[2], x[.])|
+%obs: 'C_4' |A(y[_], x[1]), A(y[1], x[2]), A(y[2], x[3]), A(y[3], x[.])|
+%obs: 'C_5' |A(y[_], x[1]), A(y[1], x[2]), A(y[2], x[3]), A(y[3], x[4]), A(y[4], x[.])|
+%obs: 'p_0' (C_1 > 4) [?] 1 [:] 0
+%obs: 'p_1' (C_2 > 4) [?] 1 [:] 0
+%obs: 'p_2' (C_3 > 4) [?] 1 [:] 0
+%obs: 'p_3' (C_4 > 4) [?] 1 [:] 0
+%obs: 'p_4' (C_5 > 4) [?] 1 [:] 0

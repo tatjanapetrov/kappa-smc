@@ -5,7 +5,7 @@ This repository contains a research prototype for statistical model checking of 
 Given a Kappa model and a bounded linear temporal logic (BLTL) property, the framework:
 
 1. parses the BLTL formula and extracts its atomic propositions;
-2. instruments the Kappa model with the observables and interventions required to evaluate those propositions;
+2. instruments the Kappa model with conditional observables that directly evaluate the truth values of atomic propositions, including at the initial state;
 3. generates stochastic trajectories using KaSim through Kappy;
 4. monitors the BLTL property over each trajectory;
 5. estimates its satisfaction probability from independent simulation runs;
@@ -26,9 +26,12 @@ kappa-smc/
 │       ├── instrumentation.py      # automatic instrumentation of Kappa models
 │       ├── simulation.py           # execution of KaSim simulations and processing of trajectory data
 │       └── estimation.py           # statistical model checking and result structures
-├── models/
-├── experiments/
-├── examples/
+├── models/                         # Kappa model definitions
+├── experiments/                    # scripts for running and reproducing experiments
+│   └── reproduce_polymerization.py
+├── results/                        # generated experimental results and plots
+│   └── polymerisation/
+├── tests/                          # automated unit tests
 └── notebooks/
     └── demonstration.ipynb         # executable demonstration of the complete workflow
 ```
@@ -128,6 +131,30 @@ Atomic propositions currently consist of:
 - the name of a Kappa algebraic variable;
 - a strict comparison operator, `<` or `>`;
 - an integer threshold.
+
+## Reproducing the polymerization case study
+
+The repository includes a script to reproduce Figure 4a of the reference paper, evaluating bounded reachability and safety properties for polymer chains of increasing length.
+
+From the repository root, run:
+
+```bash
+python -m experiments.reproduce_polymerization --kappa-bin /path/to/kappa/bin --runs 1000
+```
+
+The experiment uses a simulation horizon of 10 time units and a default sampling period of 0.01. It estimates satisfaction probabilities for five chain-length thresholds and generates a CSV file and plots in `results/polymerisation/`.
+
+The plotted error bars correspond to a fixed tolerance of ±0.05, truncated to the interval [0, 1], following the convention reported in the paper.
+
+## Running tests
+
+Run the unit tests from the repository root:
+
+```bash
+python -m pytest -q tests/
+```
+
+The tests cover BLTL monitoring, Kappa instrumentation, and simulation result processing. They do not require running KaSim.
 
 ## Cite us
 
